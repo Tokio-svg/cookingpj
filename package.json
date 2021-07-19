@@ -1,0 +1,26 @@
+{
+  "name": "cookingpj",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "build:prod": "cross-env NODE_ENV=\"production\" nuxt build",
+    "start": "nuxt start",
+    "start:prod": "cross-env NODE_ENV=\"production\" nuxt start",
+    "generate": "nuxt generate",
+    "generate-prod": "cross-env NODE_ENV=\"production\" nuxt generate"
+  },
+  "dependencies": {
+    "@nuxtjs/auth-next": "^5.0.0-1624817847.21691f1",
+    "@nuxtjs/axios": "^5.13.6",
+    "core-js": "^3.15.1",
+    "cross-env": "^7.0.3",
+    "firebase": "^8.7.0",
+    "firebase-tools": "^9.14.0",
+    "nuxt": "^2.15.7",
+    "save": "^2.4.0",
+    "vee-validate": "^3.4.10"
+  },
+  "devDependencies": {}
+}
