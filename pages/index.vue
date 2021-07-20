@@ -16,6 +16,10 @@
       </div>
     </div>
     <div class="list_wrap">
+      <div>
+        <img class="QRcode" src="/img/386mfwmq.png" alt="no_image">
+        <p>↑Line Botはこちら</p>
+      </div>
       <div class="search_list-wrap">
         <p class="list_title">楽天レシピ</p>
         <p v-show="searchResult.length === 0" class="noresult">該当するレシピはありません</p>
@@ -237,5 +241,9 @@ export default {
 .noresult {
   margin-top: 10px;
   text-align: center;
+}
+.QRcode {
+  width: 100px;
+  height: 100px;
 }
 </style>
