@@ -32,7 +32,8 @@ export default {
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
     { src: '@/plugins/vee-validate.js' },
-    { src: '~/plugins/apiurl.js'},
+    { src: '~/plugins/apiurl.js' },
+    { src: '~/plugins/VueLoading.js' },
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -60,8 +61,8 @@ export default {
     strategies: {
       'laravelJWT': {
         provider: 'laravel/jwt',
-        // url: 'http://localhost:8000',
-        url: 'https://thawing-mountain-07325.herokuapp.com',
+        url: 'http://localhost:8000',
+        // url: 'https://thawing-mountain-07325.herokuapp.com',
         token: {
           maxAge: 60 * 60
         },

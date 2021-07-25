@@ -3,17 +3,26 @@
     <div class="card_wrap">
       <h1>ログイン</h1>
       <validation-observer ref="obs" v-slot="ObserverProps">
-        <div>
-          <validation-provider v-slot="ProviderProps" rules="required">
-            <div class="error">{{ ProviderProps.errors[0] }}</div>
-            <input type="text" v-model="email" placeholder="メールアドレス" name="メールアドレス">
-          </validation-provider>
-        </div>
-        <div>
-          <validation-provider v-slot="ProviderProps" rules="required">
-            <div class="error">{{ ProviderProps.errors[0] }}</div>
-            <input type="text" v-model="password" placeholder="パスワード" name="パスワード">
-          </validation-provider>
+        <!-- ローディング -->
+        <vue-loading
+          type="spiningDubbles"
+          color="#aaa"
+          :size="{ width: '80px', height: '80px' }"
+          class="loading_indicater" v-show="loading"
+        />
+        <div v-show="!loading">
+          <div>
+            <validation-provider v-slot="ProviderProps" rules="required">
+              <div class="error">{{ ProviderProps.errors[0] }}</div>
+              <input type="text" v-model="email" placeholder="メールアドレス" name="メールアドレス">
+            </validation-provider>
+          </div>
+          <div>
+            <validation-provider v-slot="ProviderProps" rules="required">
+              <div class="error">{{ ProviderProps.errors[0] }}</div>
+              <input type="password" v-model="password" placeholder="パスワード" name="パスワード">
+            </validation-provider>
+          </div>
         </div>
         <div>
           <button class="login_button" v-on:click="login"
@@ -38,10 +47,12 @@ export default {
     return {
       email: null,
       password: null,
+      loading: false,
     }
   },
   methods: {
     async login() {
+      this.loading = true;
       try {
         await this.$auth.loginWith("laravelJWT", {
           data: {
@@ -49,9 +60,10 @@ export default {
             password: this.password,
           },
         });
-        alert("ログインしました");
+        this.loading = false;
         this.$router.push("/");
       } catch {
+        this.loading = false;
         alert("メールアドレスまたはパスワードが間違っております");
       }
     },

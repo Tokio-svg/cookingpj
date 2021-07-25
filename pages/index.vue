@@ -22,7 +22,14 @@
       </div>
       <div class="search_list-wrap">
         <p class="list_title">楽天レシピ</p>
-        <p v-show="searchResult.length === 0" class="noresult">該当するレシピはありません</p>
+        <!-- ローディングインジケータ -->
+        <vue-loading
+          type="cylon"
+          color="#aaa"
+          :size="{ width: '80px', height: '80px' }"
+          class="loading_indicater" v-show="loadingLeft"
+        />
+        <p v-show="searchResult.length === 0" class="noresult">{{resultMessage}}</p>
         <p v-show="searchResult.length != 0" class="noresult">"{{searchName}}"の検索結果</p>
         <div class="search_card-wrap">
           <div class="search_card" v-for="item in searchResult" v-bind:key="item.recipeId" v-on:click="select(searchCategoryId,item.recipeId)">
@@ -35,8 +42,15 @@
       </div>
       <div class="save_list-wrap">
         <p class="list_title">投稿レシピ</p>
+        <!-- ローディングインジケータ -->
+        <vue-loading
+          type="cylon"
+          color="#aaa"
+          :size="{ width: '80px', height: '80px' }"
+          class="loading_indicater" v-show="loadingRight"
+        />
         <!-- 検索結果 -->
-        <p v-show="searchResultRight.length === 0" class="noresult">該当するレシピはありません</p>
+        <p v-show="searchResultRight.length === 0" class="noresult">{{resultMessageRight}}</p>
         <!-- ページ情報 -->
         <div v-show="searchResultRight.length != 0" class="page_info">
           <p>"{{searchName}}"の検索結果：{{test.total}}件のレシピ</p>
@@ -48,7 +62,7 @@
         <div class="search_card-wrap" v-show="searchResultRight != []">
           <div class="search_card" v-for="item in searchResultRight" v-bind:key="item.id" v-on:click="selectRight(item.id)">
             <div class="card_image-container">
-              <img  :src="`${ApiUrl}${item.img_path}`" alt="no image" class="card_image">
+              <img  :src="getImagePath(item.img_path)" alt="no image" class="card_image">
             </div>
             <p class="card_title">{{ item.name }}</p>
           </div>
@@ -66,6 +80,8 @@ export default {
   data() {
     return {
       loading: true,
+      loadingRight: false,
+      loadingLeft: false,
       // mediumカテゴリ情報
       categoryInfo: getGategoryList.getGategoryList,
       categoryApiUrl: "https://app.rakuten.co.jp/services/api/Recipe/CategoryList/20170426?format=json&categoryType=medium&elements=categoryId%2CcategoryName%2CparentCategoryId&applicationId=1095040277832397186",
@@ -79,6 +95,8 @@ export default {
       prevPageUrl: "",
       test: "",
       ApiUrl: this.$apiUrl.url,
+      resultMessage: "",
+      resultMessageRight: "",
     }
   },
   methods: {
@@ -87,9 +105,11 @@ export default {
       this.searchName = this.search;
       const category = this.categoryInfo.find((c)=> c.categoryName === this.search);
       if (!category) {
+        this.resultMessage = `${this.searchName}カテゴリーは存在しません。`;
         this.searchResult = [];
         this.searchCategoryId = null;
       } else {
+        this.loadingLeft = true;
         // 楽天レシピ検索
         await axios
           .get(`https://app.rakuten.co.jp/services/api/Recipe/CategoryRanking/20170426?format=json&categoryId=${category.parentCategoryId}-${category.categoryId}&elements=foodImageUrl%2CrecipeMaterial%2CrecipeUrl%2CrecipeTitle%2CmediumImageUrl%2CrecipeId&applicationId=1095040277832397186`)
@@ -100,9 +120,11 @@ export default {
           .catch((error) => {
             console.log(error);
             alert('エラーが発生しました。時間を置いて再度お試しください。');
-          });
+          })
+          .finally(this.loadingLeft=false);
       }
       // 登録レシピ検索
+      this.loadingRight = true;
       this.findPostRecipe(`${this.ApiUrl}api/v1/search/${this.search}`);
     },
     // 投稿レシピからの検索処理
@@ -115,10 +137,15 @@ export default {
           this.pageInfo = `${this.test.current_page}/${this.test.last_page}`;
           this.prevPageUrl = this.test.prev_page_url;
           this.nextPageUrl = this.test.next_page_url;
+          this.resultMessageRight = "";
+          if (this.searchResultRight.length === 0) {
+            this.resultMessageRight = "該当するレシピはありません。";
+          }
         })
         .catch((error) => {
           console.log(error);
-        });
+        })
+        .finally(this.loadingRight=false);
     },
     select(categoryId,recipeId) {
       this.$router.push(`detail/${categoryId}/${recipeId}`);
@@ -129,6 +156,16 @@ export default {
     goPost() {
       this.$router.push('/post');
     },
+    // img_pathから画像ファイルのパスを返す
+    getImagePath(path) {
+      if (path === 'no_image.png') {
+        return '/img/no_image.png';
+      }
+      else {
+        // return `http://localhost/xfree/images/${path}`;
+        return `http://h2iuu2ea.php.xdomain.jp/images/${path}`;
+      }
+    }
   }
 }
 </script>

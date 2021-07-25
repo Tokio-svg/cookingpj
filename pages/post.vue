@@ -43,7 +43,14 @@
             <button class="add_button" v-on:click="addProcess" :disabled="ObserverProps.invalid || !ObserverProps.validated">手順追加</button>
           </validation-observer>
           <div>
-            <button v-on:click="sendRecipe" :disabled="!formCheck">レシピ登録</button>
+            <button v-on:click="sendRecipe" :disabled="!formCheck" v-show="!loading">レシピ登録</button>
+            <!-- ローディングインジケータ -->
+            <vue-loading
+              type="cylon"
+              color="#aaa"
+              :size="{ width: '40px', height: '40px' }"
+              v-show="loading"
+            />
           </div>
       </div>
       <div class="display">
@@ -99,8 +106,10 @@ export default {
       inputProcess: null,
       processes: [],
       file: "",
+      imgPath: "no_image.png",
       confirmedImage: null,
       imgMessage: "",
+      loading: false,
     }
   },
   created() {
@@ -129,10 +138,30 @@ export default {
       this.inputProcess = null;
     },
     async sendRecipe() {
+      console.log(`this.file=${this.file}`);
+      // 画像データをアップロード
+      const formD = new FormData();
+      formD.append("file", this.file);
+      let request = new XMLHttpRequest();
+      const url = 'http://h2iuu2ea.php.xdomain.jp/catch.php';
+      // const url = 'http://localhost/xfree/catch.php';
+      // レスポンスを待ってPOST送信
+      request.open('POST', url,false);
+      await request.send(formD);
+      // 画像が正常にアップロードされたらrequest.responseからパスを取得
+      // errorが帰ってきた場合はno_imageのパスを格納
+      if (request.response != 'error' && request.response != "") {
+        this.imgPath = request.response;
+      }
+      else {
+        this.imgPath = 'no_image.png';
+      }
+      console.log(`response=${request.response}`);
+      // レシピ情報をAPIに送信
       const formData = new FormData();
       formData.append('recipe_name',this.name);
       formData.append('category',this.category);
-      formData.append('image',this.file);
+      formData.append('image_path',this.imgPath);
       formData.append('userId',this.$auth.user.id);
 
       // materialsとprocessesは文字列に変換して格納する
@@ -141,6 +170,7 @@ export default {
       items = JSON.stringify(this.processes);
       formData.append('processes',items);
 
+      this.loading = true;
       await axios.post(this.ApiUrl,formData)
       .then(() => {
         alert("レシピを投稿しました");
@@ -152,9 +182,11 @@ export default {
       .catch((error) => {
           console.log(error);
           alert("投稿に失敗しました。時間を置いて再度お試しください。");
-          this.$router.push('/');
       })
-      .finally(() => (this.$router.push('/')));
+      .finally(() => {
+        this.loading = false;
+        this.$router.push('/');
+      });
     },
     // 画像ファイル情報を取得
     confirmImage(e) {
@@ -176,6 +208,7 @@ export default {
       reader.readAsDataURL(file);
       reader.onload = e => {
         this.confirmedImage = e.target.result;
+        this.file = e.target.result;
       }
     },
     // 材料リスト上移動

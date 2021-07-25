@@ -3,23 +3,32 @@
     <div class="card_wrap">
       <h1>新規登録</h1>
       <validation-observer ref="obs" v-slot="ObserverProps">
-        <div>
-          <validation-provider v-slot="ProviderProps" rules="required|max:20">
-            <div class="error">{{ ProviderProps.errors[0] }}</div>
-            <input type="text" v-model="name" placeholder="ユーザーネーム" name="ユーザーネーム">
-          </validation-provider>
-        </div>
-        <div>
-          <validation-provider v-slot="ProviderProps" rules="required|email">
-            <div class="error">{{ ProviderProps.errors[0] }}</div>
-            <input type="text" v-model="email" placeholder="メールアドレス" name="メールアドレス">
-          </validation-provider>
-        </div>
-        <div>
-          <validation-provider v-slot="ProviderProps" rules="required|min:6">
-            <div class="error">{{ ProviderProps.errors[0] }}</div>
-            <input type="text" v-model="password" placeholder="パスワード" name="パスワード">
-          </validation-provider>
+        <!-- ローディング -->
+        <vue-loading
+          type="spiningDubbles"
+          color="#aaa"
+          :size="{ width: '80px', height: '80px' }"
+          class="loading_indicater" v-show="loading"
+        />
+        <div v-show="!loading">
+          <div>
+            <validation-provider v-slot="ProviderProps" rules="required|max:20">
+              <div class="error">{{ ProviderProps.errors[0] }}</div>
+              <input type="text" v-model="name" placeholder="ユーザーネーム" name="ユーザーネーム">
+            </validation-provider>
+          </div>
+          <div>
+            <validation-provider v-slot="ProviderProps" rules="required|email">
+              <div class="error">{{ ProviderProps.errors[0] }}</div>
+              <input type="text" v-model="email" placeholder="メールアドレス" name="メールアドレス">
+            </validation-provider>
+          </div>
+          <div>
+            <validation-provider v-slot="ProviderProps" rules="required|min:6">
+              <div class="error">{{ ProviderProps.errors[0] }}</div>
+              <input type="password" v-model="password" placeholder="パスワード" name="パスワード">
+            </validation-provider>
+          </div>
         </div>
         <div>
           <button class="register_button" v-on:click="register"
@@ -48,19 +57,22 @@ export default {
       password: null,
       // laravel APIのアドレス
       ApiUrl: this.$apiUrl.url,
+      loading: false,
     }
   },
   methods: {
     async register() {
+      this.loading = true;
       try {
         await axios.post(`${this.ApiUrl}api/auth/register`, {
         name: this.name,
         email: this.email,
         password: this.password,
         });
-        console.log('ok');
+        this.loading = false;
         this.$router.push("/login");
       } catch {
+        this.loading = false;
         alert("メールアドレスが既に登録されています。");
       }
     },
