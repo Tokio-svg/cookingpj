@@ -98,6 +98,8 @@ export default {
     return {
       // laravel APIのアドレス
       ApiUrl:`${this.$apiUrl.url}api/v1/recipe`,
+      // XFREE APIのアドレス
+      imageApiUrl: this.$apiUrl.imgUrl,
       name: null,
       category: null,
       inputMaterial: null,
@@ -143,8 +145,7 @@ export default {
       const formD = new FormData();
       formD.append("file", this.file);
       let request = new XMLHttpRequest();
-      const url = 'http://h2iuu2ea.php.xdomain.jp/catch.php';
-      // const url = 'http://localhost/xfree/catch.php';
+      const url = `${this.imageApiUrl}catch.php`;
       // レスポンスを待ってPOST送信
       request.open('POST', url,false);
       await request.send(formD);

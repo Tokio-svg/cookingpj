@@ -9,7 +9,7 @@
       <h3>カテゴリー：{{info.category}}</h3>
       <div class="recipe_wrap">
         <div class="recipe_image">
-          <img :src="`${imgPath}`" alt="no image">
+          <img :src="getImagePath(info.img_path,'image')" alt="no image" id="image">
         </div>
         <div class="recipe_material">
           <h2>材料</h2>
@@ -42,6 +42,8 @@ export default {
       imgPath: "",
       // laravel APIのアドレス
       ApiUrl: this.$apiUrl.url,
+      // XFREE APIのアドレス
+      imageApiUrl: this.$apiUrl.imgUrl,
     }
   },
   // Apiから投稿情報を取得
@@ -78,6 +80,34 @@ export default {
       if (!user) return "";
       return user.name;
     },
+    // img_pathから画像ファイルのパスを返す
+    getImagePath(path,id) {
+      if (path === 'no_image.png') {
+        return '/img/no_image.png';
+      }
+      else {
+        let getRequest = new XMLHttpRequest();
+        const getUrl = `${this.imageApiUrl}catch.php?file=${path}`
+        getRequest.open('GET', getUrl);
+        getRequest.send();
+        // 通信が完了したらレスポンスをコンソールに出力する
+        getRequest.addEventListener('readystatechange', () => {
+          if (getRequest.readyState === 4 && getRequest.status === 200) {
+            const element = document.querySelector(`#${id}`);
+            // base64形式のデータをimg属性のsrcにセット
+            let img_base64_content = getRequest.response;
+            // 該当するファイルが存在する場合はsrcに画像データをセット
+            if (img_base64_content != 'not_exists') {
+              element.src = "data:image/png;base64," + img_base64_content;
+            }
+            else {
+              element.src = '/img/no_image.png';
+            }
+          }
+        });
+        return;
+      }
+    }
   },
   computed: {
     checkDelete: function() {

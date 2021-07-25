@@ -62,7 +62,7 @@
         <div class="search_card-wrap" v-show="searchResultRight != []">
           <div class="search_card" v-for="item in searchResultRight" v-bind:key="item.id" v-on:click="selectRight(item.id)">
             <div class="card_image-container">
-              <img  :src="getImagePath(item.img_path)" alt="no image" class="card_image">
+              <img  :src="getImagePath(item.img_path,item.id)" alt="no image" class="card_image" :id="`img${item.id}`">
             </div>
             <p class="card_title">{{ item.name }}</p>
           </div>
@@ -94,7 +94,10 @@ export default {
       nextPageUrl: "",
       prevPageUrl: "",
       test: "",
+      // laravel APIのアドレス
       ApiUrl: this.$apiUrl.url,
+      // XFREE APIのアドレス
+      imageApiUrl: this.$apiUrl.imgUrl,
       resultMessage: "",
       resultMessageRight: "",
     }
@@ -157,13 +160,31 @@ export default {
       this.$router.push('/post');
     },
     // img_pathから画像ファイルのパスを返す
-    getImagePath(path) {
+    getImagePath(path,id) {
       if (path === 'no_image.png') {
         return '/img/no_image.png';
       }
       else {
-        // return `http://localhost/xfree/images/${path}`;
-        return `http://h2iuu2ea.php.xdomain.jp/images/${path}`;
+        let getRequest = new XMLHttpRequest();
+        const getUrl = `${this.imageApiUrl}catch.php?file=${path}`
+        getRequest.open('GET', getUrl);
+        getRequest.send();
+        // 通信が完了したらレスポンスをコンソールに出力する
+        getRequest.addEventListener('readystatechange', () => {
+          if (getRequest.readyState === 4 && getRequest.status === 200) {
+            const element = document.querySelector(`#img${id}`);
+            // base64形式のデータをimg属性のsrcにセット
+            let img_base64_content = getRequest.response;
+            // 該当するファイルが存在する場合はsrcに画像データをセット
+            if (img_base64_content != 'not_exists') {
+              element.src = "data:image/png;base64," + img_base64_content;
+            }
+            else {
+              element.src = '/img/no_image.png';
+            }
+          }
+        });
+        return;
       }
     }
   }
