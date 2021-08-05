@@ -140,30 +140,32 @@ export default {
       this.inputProcess = null;
     },
     async sendRecipe() {
-      console.log(`this.file=${this.file}`);
+      // console.log(`this.file=${this.file}`);
       // 画像データをアップロード
-      const formD = new FormData();
-      formD.append("file", this.file);
-      let request = new XMLHttpRequest();
-      const url = `${this.imageApiUrl}catch.php`;
-      // レスポンスを待ってPOST送信
-      request.open('POST', url,false);
-      await request.send(formD);
-      // 画像が正常にアップロードされたらrequest.responseからパスを取得
-      // errorが帰ってきた場合はno_imageのパスを格納
-      if (request.response != 'error' && request.response != "") {
-        this.imgPath = request.response;
-      }
-      else {
-        this.imgPath = 'no_image.png';
-      }
-      console.log(`response=${request.response}`);
+      // const formD = new FormData();
+      // formD.append("file", this.file);
+      // let request = new XMLHttpRequest();
+      // const url = `${this.imageApiUrl}catch.php`;
+      // // レスポンスを待ってPOST送信
+      // request.open('POST', url,false);
+      // await request.send(formD);
+      // // 画像が正常にアップロードされたらrequest.responseからパスを取得
+      // // errorが帰ってきた場合はno_imageのパスを格納
+      // if (request.response != 'error' && request.response != "") {
+      //   this.imgPath = request.response;
+      // }
+      // else {
+      //   this.imgPath = 'no_image.png';
+      // }
+      // console.log(`response=${request.response}`);
+
       // レシピ情報をAPIに送信
       const formData = new FormData();
       formData.append('recipe_name',this.name);
       formData.append('category',this.category);
-      formData.append('image_path',this.imgPath);
+      // formData.append('image_path',this.imgPath);
       formData.append('userId',this.$auth.user.id);
+      formData.append('file',this.file);
 
       // materialsとprocessesは文字列に変換して格納する
       let items = JSON.stringify(this.materials);

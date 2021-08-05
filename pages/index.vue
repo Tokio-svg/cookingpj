@@ -62,7 +62,7 @@
         <div class="search_card-wrap" v-show="searchResultRight != []">
           <div class="search_card" v-for="item in searchResultRight" v-bind:key="item.id" v-on:click="selectRight(item.id)">
             <div class="card_image-container">
-              <img  :src="getImagePath(item.img_path,item.id)" alt="no image" class="card_image" :id="`img${item.id}`">
+              <img :src="item.img_data" alt="no image" class="card_image">
             </div>
             <p class="card_title">{{ item.name }}</p>
           </div>
@@ -123,12 +123,13 @@ export default {
           .catch((error) => {
             console.log(error);
             alert('エラーが発生しました。時間を置いて再度お試しください。');
-          })
-          .finally(this.loadingLeft=false);
+          });
+          this.loadingLeft=false;
       }
       // 登録レシピ検索
       this.loadingRight = true;
-      this.findPostRecipe(`${this.ApiUrl}api/v1/search/${this.search}`);
+      await this.findPostRecipe(`${this.ApiUrl}api/v1/search/${this.search}`);
+      this.loadingRight = false;
     },
     // 投稿レシピからの検索処理
     async findPostRecipe(url) {
@@ -147,8 +148,7 @@ export default {
         })
         .catch((error) => {
           console.log(error);
-        })
-        .finally(this.loadingRight=false);
+        });
     },
     select(categoryId,recipeId) {
       this.$router.push(`detail/${categoryId}/${recipeId}`);
@@ -159,7 +159,7 @@ export default {
     goPost() {
       this.$router.push('/post');
     },
-    // img_pathから画像ファイルのパスを返す
+    // img_pathから画像ファイルのパスを返す(廃止)
     getImagePath(path,id) {
       if (path === 'no_image.png') {
         return '/img/no_image.png';
